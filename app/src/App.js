@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
+import Card from "./components/card/Card";
 import './App.css';
 
 const App = () => {
@@ -86,7 +87,13 @@ const App = () => {
   const renderConnectedContainer = () => (
     <div>
       <p>You are now connected! :)</p>
-
+      <p>I see that you haven't subscribed to our services! Wanna use our awesome platform?</p>
+      <p>Here's a list of our best offers</p>
+      <div class="card-container">
+        <Card tier="Basic" price="10" img="baby-groot" />
+        <Card tier="Standard" price="15" img="baby-yoda" />
+        <Card tier="Premium" price="20" img="baby-spiderman" />
+      </div>
     </div>
   );
 
