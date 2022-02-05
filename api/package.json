@@ -1,0 +1,22 @@
+{
+  "name": "miniflix-api",
+  "version": "1.0.0",
+  "description": "Miniflix API",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leovct/miniflix.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leovct/miniflix/issues"
+  },
+  "homepage": "https://github.com/leovct/miniflix#readme",
+  "dependencies": {
+    "express": "^4.17.2"
+  }
+}
