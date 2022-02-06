@@ -200,10 +200,11 @@ router.put("/:id/update", (req, res) => {
         return;
     }
     const oldDate = getAttribute(card, "Start date");
+    const oldDuration = getAttribute(card, "Duration");
 
     // Get the current date to check if the card is expired
     const now = Math.round(+new Date()/1000);
-    if (now <= oldDate) {
+    if (now <= oldDate + oldDuration * 60 * 60 * 24) {
         res.status(404);
         res.json({ error: "card is not expired", value: oldDate });
         return;
