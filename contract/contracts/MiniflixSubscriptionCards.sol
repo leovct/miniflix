@@ -62,7 +62,7 @@ contract MiniflixSubscriptionCards is ERC721URIStorage, Ownable, PriceConsumerV3
         _safeMint(msg.sender, newTokenId);
 
         // Set the nft metadata
-        _setTokenURI(newTokenId, string(abi.encodePacked(_baseTokenURI, Strings.toString(newTokenId))));
+        _setTokenURI(newTokenId, newTokenId);
         emit NewNFTMinted(msg.sender, newTokenId);
     }
 
