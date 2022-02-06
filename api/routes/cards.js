@@ -98,7 +98,7 @@ router.post("", (req, res) => {
 
     console.log("POST: subscription card #%s created (start date: %s, duration: %s, tier: %s)", id, card.startDate, card.duration, card.tier);
     res.status(201);
-    res.json({ status: "Subscription card created", id: id });
+    res.json({ status: "subscription card created", id: id });
 });
 
 /**
@@ -143,7 +143,7 @@ router.put("/:id/update", (req, res) => {
 
     console.log("POST: subscription card #%s updated (new tier: %s)", id, tier);
     res.status(200);
-    res.json({ status: "Subscription card tier updated", id: id }); 
+    res.json({ status: "subscription card tier updated", id: id }); 
 });
 
 /**
@@ -184,15 +184,66 @@ router.put("/:id/update", (req, res) => {
 
     console.log("POST: subscription card #%s updated (new duration: %s)", id, newDuration);
     res.status(200);
-    res.json({ status: "Subscription card duration updated", id: id }); 
+    res.json({ status: "subscription card duration updated", id: id }); 
 });
 
 /**
  * Subscribe again after a subscription card has expired.
  */
  router.put("/:id/resubscribe", (req, res) => {
-    // TODO
+    const id = req.params.id;
+
+    // Check if the id is a number
+    if (!isNumeric(id) || !(id >= 0)) {
+        res.status(404);
+        res.json({ error: "id is not valid", value: id });
+        return;
+    }
+
+    // Find the card in the database
+    const card = getCard(id);
+    if (!card) {
+        res.status(404);
+        res.json({ error: "metadata not found for Miniflix Subscription Card #" + id });
+        return;
+    }
+    const oldDate = getAttribute(card, "Start date");
+
+    // Get the current date to check if the card is expired
     const now = Math.round(+new Date()/1000);
+    if (now <= oldDate) {
+        res.status(404);
+        res.json({ error: "card is not expired", value: oldDate });
+        return;
+    }
+
+    // Check the duration parameter
+    let duration = req.query.duration;
+    if (!duration || !isNumeric(duration) || !(duration > 0)) {
+        res.status(400);
+        res.json({ error: "duration is not valid", value: duration });
+        return;
+    }
+    duration = parseInt(duration, 10);
+
+    // Check the tier parameter
+    const tier = req.query.tier;
+    if (!tier || !isTierValid(tier)) {
+        res.status(400);
+        res.json({ error: "tier is not valid", value: tier });
+        return;
+    }
+
+    // Update the card values
+    card.attributes = updateAttribute(card, "Start date", now);
+    card.attributes = updateAttribute(card, "Duration", duration);
+    card.attributes = updateAttribute(card, "Tier", tier);
+    saveData();
+
+    console.log("POST: subscription card #%s re-activated (start date: %s, duration: %s, tier: %s)", id, card.startDate, card.duration, card.tier);
+    res.status(200);
+    res.json({ status: "subscription card re-activated", id: id }); 
+
 });
 
 /**
