@@ -178,7 +178,7 @@ router.put("/:id/update", (req, res) => {
 
     // Update the card
     const oldDuration = getAttribute(card, "Duration");
-    const newDuration = oldDuration + duration * 60 * 24;
+    const newDuration = oldDuration + duration * 60 * 60 * 24;
     card.attributes = updateAttribute(card, "Duration", newDuration);
     saveData();
 
