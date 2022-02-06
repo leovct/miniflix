@@ -104,7 +104,7 @@ router.post("", (req, res) => {
 /**
  * Update the tier of a subscription card.
  */
-router.put("/update/:id", (req, res) => {
+router.put("/:id/update", (req, res) => {
     const id = req.params.id;
 
     // Check if the id is a number
@@ -149,7 +149,7 @@ router.put("/update/:id", (req, res) => {
 /**
  * Extend the duration of a subscription card.
  */
- router.put("/extend/:id", (req, res) => {
+ router.put("/:id/extend", (req, res) => {
     const id = req.params.id;
 
     // Check if the id is a number
@@ -190,7 +190,7 @@ router.put("/update/:id", (req, res) => {
 /**
  * Subscribe again after a subscription card has expired.
  */
- router.put("/resubscribe/:id", (req, res) => {
+ router.put("/:id/resubscribe", (req, res) => {
     // TODO
     const now = Math.round(+new Date()/1000);
 });
