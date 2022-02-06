@@ -8,6 +8,40 @@ const cardsPath = "../data/cards.json";
 let cards = require(cardsPath);
 
 /**
+ * Get all the subscription cards.
+ */
+ router.get("", (req, res) => {
+    res.status(200);
+    res.json(cards);
+});
+
+/**
+ * Get the json representation of a subscription card.
+ */
+router.get("/:id", (req, res) => {
+    const id = req.params.id;
+
+    // Check if the id is a number
+    if (!isNumeric(id) || !(id >= 0)) {
+        res.status(404);
+        res.json({ error: "id is not valid", value: id });
+        return;
+    }
+
+    // Find the card in the database
+    const card = getCard(id);
+    if (!card) {
+        res.status(404);
+        res.json({ error: "metadata not found for Miniflix Subscription Card #" + id });
+        return;
+    }
+
+    // Return the json representation
+    res.status(200);
+    res.json(card);
+});
+
+/**
  * Create a new subscription card.
  */
 router.use(express.json());
@@ -65,32 +99,6 @@ router.post("", (req, res) => {
     console.log("POST: subscription card #%s created (start date: %s, duration: %s, tier: %s)", id, card.startDate, card.duration, card.tier);
     res.status(201);
     res.json({ status: "Subscription card created", id: id });
-});
-
-/**
- * Get the json representation of a subscription card.
- */
-router.get("/:id", (req, res) => {
-    const id = req.params.id;
-
-    // Check if the id is a number
-    if (!isNumeric(id) || !(id >= 0)) {
-        res.status(404);
-        res.json({ error: "id is not valid", value: id });
-        return;
-    }
-
-    // Find the card in the database
-    const card = getCard(id);
-    if (!card) {
-        res.status(404);
-        res.json({ error: "metadata not found for Miniflix Subscription Card #" + id });
-        return;
-    }
-
-    // Return the json representation
-    res.status(200);
-    res.json(card);
 });
 
 /**
@@ -184,6 +192,7 @@ router.put("/update/:id", (req, res) => {
  */
  router.put("/resubscribe/:id", (req, res) => {
     // TODO
+    const now = Math.round(+new Date()/1000);
 });
 
 /**
