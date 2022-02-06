@@ -45,12 +45,10 @@ contract MiniflixSubscriptionCards is ERC721URIStorage, Ownable, PriceConsumerV3
      */
     function mint(Tier _tier) public payable {
         // Get the subscription price in ETH
-        /*
         uint256 maticUSD = getLatestPrice();
         uint256 subscriptionUSDPrice = getSubscriptionPrice(_tier);
-        uint256 subscriptionMaticPrice = subscriptionUSDPrice.mul(10 ** 18).div(maticUSD);
-        */
-        require(msg.value >= 1, "not enough MATIC sent"); 
+        uint256 subscriptionMaticPrice = subscriptionUSDPrice.mul(10**8).div(maticUSD);
+        require(msg.value >= subscriptionMaticPrice.mul(1000000000000000000), "not enough MATIC sent"); 
 
         // Get the current tokenId (it starts at 0)
         uint256 newTokenId = _tokenIds.current();
@@ -62,7 +60,7 @@ contract MiniflixSubscriptionCards is ERC721URIStorage, Ownable, PriceConsumerV3
         _safeMint(msg.sender, newTokenId);
 
         // Set the nft metadata
-        _setTokenURI(newTokenId, newTokenId);
+        _setTokenURI(newTokenId, Strings.toString(newTokenId));
         emit NewNFTMinted(msg.sender, newTokenId);
     }
 
