@@ -12,7 +12,7 @@ app.use((_, res, next) => {
     res.header('Access-Control-Allow-Methods', 'POST, PUT, GET, OPTIONS');
     next();
 });
-app.use("/card", card);
+app.use("/cards", card);
 
 // Default route
 app.get("/", function (_, res) {
