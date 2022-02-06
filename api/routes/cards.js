@@ -10,18 +10,43 @@ let cards = require(cardsPath);
 /**
  * Create a new subscription card.
  */
- router.use(express.json())
- router.post("", (req, res) => {
-    const id = cards.length ? Math.max(...cards.map(x => x.id)) + 1 : 1;
-    if (!id) {
+router.use(express.json());
+router.post("", (req, res) => {
+    // Check the id parameter
+    const id = cards.length ? Math.max(...cards.map(x => x.id)) + 1 : 0;
+    if (id === null) {
         res.status(500);
         res.json({ error: "can't create a new subscription card because the id is null" });
         return;
     }
 
-    const startDate = req.query.startDate
-    const duration = req.query.duration
-    const tier = req.query.tier
+    // Check the start date parameter
+    let startDate = req.query.startDate;
+    if (!startDate || !isNumeric(startDate) || !(startDate > 0)) {
+        res.status(400);
+        res.json({ error: "start date is not valid" });
+        return;
+    }
+    startDate = parseInt(startDate, 10);
+
+    // Check the duration parameter
+    let duration = req.query.duration;
+    if (!duration || !isNumeric(duration) || !(duration > 0)) {
+        res.status(400);
+        res.json({ error: "duration is not valid", value: duration });
+        return;
+    }
+    duration = parseInt(duration, 10);
+
+    // Check the tier parameter
+    const tier = req.query.tier;
+    if (!tier || !isTierValid(tier)) {
+        res.status(400);
+        res.json({ error: "tier is not valid", value: tier });
+        return;
+    }
+
+    // Create the new card
     const card = {
         id: id,
         name: "Miniflix Subscription Card #" + id,
@@ -29,29 +54,18 @@ let cards = require(cardsPath);
         image: getImagePath(tier),
         external_url: "https://miniflix-app.vercel.app",
         attributes: [
-            {
-                display_type: "date",
-                trait_type: "Start date",
-                value: startDate,
-            },
-            {
-                trait_type: "Duration",
-                value: duration,
-            },
-            {
-                display_type: "number",
-                trait_type: "Tier",
-                value: tier,
-            },
+            {display_type: "date", trait_type: "Start date", value: startDate,},
+            {trait_type: "Duration", value: duration},
+            {display_type: "number", trait_type: "Tier", value: tier},
         ]
     }
     cards.push(card);
     saveData();
-    
+
     console.log("POST: subscription card #%s created (start date: %s, duration: %s, tier: %s)", id, startDate, duration, tier);
     res.status(201);
-    res.json({status: "Subscription card created", id: id});
-})
+    res.json({ status: "Subscription card created", id: id });
+});
 
 /**
  * Get the json representation of a subscription card.
@@ -60,17 +74,9 @@ router.get("/:id", (req, res) => {
     const id = req.params.id;
 
     // Check if the id is a number
-    if (!isNumeric(id)) {
+    if (!isNumeric(id) || !(idNumber >= 0)) {
         res.status(404);
-        res.json({ error: "id is not a number or it is badly written" });
-        return;
-    }
-
-    // Check if the number is lower than 0 
-    const idNumber = parseInt(id);
-    if (idNumber < 0 ) {
-        res.status(404);
-        res.json({ error: "id must be positive or equal to 0" });
+        res.json({ error: "id is not valid", value: id });
         return;
     }
 
@@ -95,19 +101,31 @@ function saveData() {
 }
 
 /**
- * Get the path of the image based on the tier.
+ * Check if a tier is valid.
  * @param {*} tier 
  * @returns 
  */
- function getImagePath(tier) {
+function isTierValid(tier) {
     switch (tier) {
         case "Basic":
         case "Standard":
         case "Premium":
-            return API_URL + "/tier/" + tier.toLowerCase() + ".png";
+            return true;
         default:
-            return "";
+            return false;
     }
+}
+
+/**
+ * Get the path of the image based on the tier.
+ * @param {*} tier 
+ * @returns 
+ */
+function getImagePath(tier) {
+    if (isTierValid(tier)) {
+        return API_URL + "/tier/" + tier.toLowerCase() + ".png"; 
+    }
+    return "";
 }
 
 /**
@@ -115,7 +133,7 @@ function saveData() {
  * @param {string} str, the string to check
  * @return {boolean} the result of the check
  */
- function isNumeric(str) {
+function isNumeric(str) {
     if (typeof str != "string") return false;
     return !isNaN(str) && !isNaN(parseFloat(str));
 }
