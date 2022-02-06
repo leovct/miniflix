@@ -135,14 +135,48 @@ router.put("/update/:id", (req, res) => {
 
     console.log("POST: subscription card #%s updated (new tier: %s)", id, tier);
     res.status(200);
-    res.json({ status: "Subscription card updated", id: id }); 
+    res.json({ status: "Subscription card tier updated", id: id }); 
 });
 
 /**
  * Extend the duration of a subscription card.
  */
  router.put("/extend/:id", (req, res) => {
-    // TODO
+    const id = req.params.id;
+
+    // Check if the id is a number
+    if (!isNumeric(id) || !(id >= 0)) {
+        res.status(404);
+        res.json({ error: "id is not valid", value: id });
+        return;
+    }
+
+    // Check the duration parameter
+    let duration = req.query.duration;
+    if (!duration || !isNumeric(duration) || !(duration > 0)) {
+        res.status(400);
+        res.json({ error: "duration is not valid", value: duration });
+        return;
+    }
+    duration = parseInt(duration, 10);
+
+    // Find the card in the database
+    const card = getCard(id);
+    if (!card) {
+        res.status(404);
+        res.json({ error: "metadata not found for Miniflix Subscription Card #" + id });
+        return;
+    }
+
+    // Update the card
+    const oldDuration = getAttribute(card, "Duration");
+    const newDuration = oldDuration + duration * 60 * 24;
+    card.attributes = updateAttribute(card, "Duration", newDuration);
+    saveData();
+
+    console.log("POST: subscription card #%s updated (new duration: %s)", id, newDuration);
+    res.status(200);
+    res.json({ status: "Subscription card duration updated", id: id }); 
 });
 
 /**
