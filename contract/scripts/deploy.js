@@ -16,7 +16,7 @@ async function main() {
 
   // Deploy the contract on the blockchain
   const ContractFactory = await hre.ethers.getContractFactory("MiniflixSubscriptionCards");
-  const apiUrl = process.env.API_URl + "/cards/";
+  const apiUrl = process.env.API_URl;
   const contract = await ContractFactory.deploy(apiUrl);
   await contract.deployed();
   console.log("MiniflixSubscriptionCards deployed to:", contract.address);

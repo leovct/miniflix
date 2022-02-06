@@ -4,9 +4,9 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./PriceConsumer.sol";
-import "hardhat/console.sol";
 
 /**
  * @title Miniflix subscription card smart contract
@@ -38,7 +38,6 @@ contract MiniflixSubscriptionCards is ERC721URIStorage, Ownable, PriceConsumerV3
      */
     constructor(string memory baseURI) ERC721("Miniflix Subscription Cards", "MSC") {
         setBaseURI(baseURI);
-        console.log("Miniflix subscription card smart contract created");
     }
 
     /**
@@ -46,10 +45,12 @@ contract MiniflixSubscriptionCards is ERC721URIStorage, Ownable, PriceConsumerV3
      */
     function mint(Tier _tier) public payable {
         // Get the subscription price in ETH
+        /*
         uint256 maticUSD = getLatestPrice();
         uint256 subscriptionUSDPrice = getSubscriptionPrice(_tier);
         uint256 subscriptionMaticPrice = subscriptionUSDPrice.mul(10 ** 18).div(maticUSD);
-        require(msg.value >= subscriptionMaticPrice, "not enough MATIC sent"); 
+        */
+        require(msg.value >= 1, "not enough MATIC sent"); 
 
         // Get the current tokenId (it starts at 0)
         uint256 newTokenId = _tokenIds.current();
@@ -59,10 +60,9 @@ contract MiniflixSubscriptionCards is ERC721URIStorage, Ownable, PriceConsumerV3
 
         // Mint the nft to the sender
         _safeMint(msg.sender, newTokenId);
-        console.log("Miniflix Subscription Card #%s has been minted to %s", newTokenId, msg.sender);
 
         // Set the nft metadata
-        _setTokenURI(newTokenId, string(abi.encodePacked(_baseTokenURI, newTokenId)));
+        _setTokenURI(newTokenId, string(abi.encodePacked(_baseTokenURI, Strings.toString(newTokenId))));
         emit NewNFTMinted(msg.sender, newTokenId);
     }
 
