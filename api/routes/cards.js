@@ -54,15 +54,6 @@ router.post("", (req, res) => {
         return;
     }
 
-    // Check the start date parameter
-    let startDate = req.query.startDate;
-    if (!startDate || !isNumeric(startDate) || !(startDate > 0)) {
-        res.status(400);
-        res.json({ error: "start date is not valid" });
-        return;
-    }
-    startDate = parseInt(startDate, 10);
-
     // Check the duration parameter
     let duration = req.query.duration;
     if (!duration || !isNumeric(duration) || !(duration > 0)) {
@@ -81,6 +72,7 @@ router.post("", (req, res) => {
     }
 
     // Create the new card
+    const now = Math.round(+new Date()/1000);
     const card = {
         id: id,
         name: "Miniflix Subscription Card #" + id,
@@ -88,7 +80,7 @@ router.post("", (req, res) => {
         image: getImagePath(tier),
         external_url: "https://miniflix-app.vercel.app",
         attributes: [
-            {display_type: "date", trait_type: "Start date", value: startDate,},
+            {display_type: "date", trait_type: "Start date", value: now,},
             {trait_type: "Duration", value: duration},
             {display_type: "number", trait_type: "Tier", value: tier},
         ]
