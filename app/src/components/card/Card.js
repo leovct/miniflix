@@ -2,7 +2,7 @@ import './Card.css';
 
 const Card = (props) => {
     return(
-        <div class="card">
+        <div className="card">
             <p>{props.tier}</p>
             <p>Price: ${props.price}</p>
             <img src={require(`../../assets/img/${props.img}.png`)} alt="card ilustration" width={200}/>
