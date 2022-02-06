@@ -4,6 +4,7 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./PriceConsumer.sol";
 import "hardhat/console.sol";
 
@@ -13,6 +14,8 @@ import "hardhat/console.sol";
  * @dev Compliant with OpenZeppelin's implementation of the ERC721 spec draft
  */
 contract MiniflixSubscriptionCards is ERC721URIStorage, Ownable, PriceConsumerV3 {
+    using SafeMath for uint256;
+
     // Use the openzeppelin library to keep track of tokenIds
     using Counters for Counters.Counter;
     // State variable that counts the number of nft minted
@@ -23,12 +26,12 @@ contract MiniflixSubscriptionCards is ERC721URIStorage, Ownable, PriceConsumerV3
 
     // Subscription prices in USD.
     enum Tier { Basic, Standard, Premium }
-    int8 public basicTierUSDPrice = 10;
-    int8 public standardTierUSDPrice = 15;
-    int8 public premiumTierUSDPrice = 20;
+    uint256 public basicTierUSDPrice = 10;
+    uint256 public standardTierUSDPrice = 15;
+    uint256 public premiumTierUSDPrice = 20;
 
     event NewNFTMinted(address sender, uint256 tokenId);
-    event SubscriptionPriceUpdated(Tier tier, int8 newPrice);
+    event SubscriptionPriceUpdated(Tier tier, uint256 newPrice);
 
     /**
      * @notice Constructor of the subscription card smart contract
@@ -43,9 +46,12 @@ contract MiniflixSubscriptionCards is ERC721URIStorage, Ownable, PriceConsumerV3
      */
     function mint(Tier _tier) public payable {
         // Get the subscription price in ETH
-        int8 subscriptionUSDPrice = getSubscriptionPrice(_tier);
-        int256 subscriptionETHPrice = getLatestPrice() / subscriptionUSDPrice; // TODO: check if it's safe to do that
-        require(int256(msg.value) >= subscriptionETHPrice, "not enough ETH sent"); 
+        /*
+        uint256 ethUSD = getLatestPrice();
+        uint256 subscriptionUSDPrice = getSubscriptionPrice(_tier);
+        uint256 subscriptionETHPrice = subscriptionUSDPrice.mul(10 ** 16).div(ethUSD);
+        */
+        require(msg.value >= 1, "not enough ETH sent"); 
 
         // Get the current tokenId (it starts at 0)
         uint256 newTokenId = _tokenIds.current();
@@ -86,7 +92,7 @@ contract MiniflixSubscriptionCards is ERC721URIStorage, Ownable, PriceConsumerV3
      * @param _tier subscription tier
      * @return the price of the subscription tier in uSD
      */
-    function getSubscriptionPrice(Tier _tier) public view returns (int8) {
+    function getSubscriptionPrice(Tier _tier) public view returns (uint256) {
         if (Tier.Basic == _tier) {
             return basicTierUSDPrice;
         } else if (Tier.Standard == _tier) {
@@ -101,7 +107,7 @@ contract MiniflixSubscriptionCards is ERC721URIStorage, Ownable, PriceConsumerV3
      * @param _tier tier of the subscription
      * @param _newPrice new price of the subscription in USD
      */
-    function updateTierSubscriptionPrice(Tier _tier, int8 _newPrice) public onlyOwner {
+    function updateTierSubscriptionPrice(Tier _tier, uint256 _newPrice) public onlyOwner {
         if (Tier.Basic == _tier) {
             basicTierUSDPrice = _newPrice;
         } else if (Tier.Standard == _tier) {

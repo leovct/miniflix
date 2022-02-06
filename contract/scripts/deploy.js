@@ -4,6 +4,7 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
+require('dotenv').config('..');
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -21,7 +22,7 @@ async function main() {
   console.log("MiniflixSubscriptionCards deployed to:", contract.address);
 
   // Verify the contract on Etherscan
-  console.log(`Verify with: $ npx hardhat verify --network CHANGE_ME ${contract.address}`)
+  console.log(`Verify with: $ npx hardhat verify --network CHANGE_ME ${contract.address} ${apiUrl}`)
 
   // Mint a few NFTs
 
