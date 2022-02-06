@@ -62,7 +62,7 @@ router.post("", (req, res) => {
     cards.push(card);
     saveData();
 
-    console.log("POST: subscription card #%s created (start date: %s, duration: %s, tier: %s)", id, startDate, duration, tier);
+    console.log("POST: subscription card #%s created (start date: %s, duration: %s, tier: %s)", id, card.startDate, card.duration, card.tier);
     res.status(201);
     res.json({ status: "Subscription card created", id: id });
 });
@@ -74,14 +74,14 @@ router.get("/:id", (req, res) => {
     const id = req.params.id;
 
     // Check if the id is a number
-    if (!isNumeric(id) || !(idNumber >= 0)) {
+    if (!isNumeric(id) || !(id >= 0)) {
         res.status(404);
         res.json({ error: "id is not valid", value: id });
         return;
     }
 
-    // Find the metadata of the card
-    const card = cards.find(x => x.id.toString() === id.toString());
+    // Find the card in the database
+    const card = getCard(id);
     if (!card) {
         res.status(404);
         res.json({ error: "metadata not found for Miniflix Subscription Card #" + id });
@@ -94,10 +94,78 @@ router.get("/:id", (req, res) => {
 });
 
 /**
+ * Update the tier of a subscription card.
+ */
+router.put("/update/:id", (req, res) => {
+    const id = req.params.id;
+
+    // Check if the id is a number
+    if (!isNumeric(id) || !(id >= 0)) {
+        res.status(404);
+        res.json({ error: "id is not valid", value: id });
+        return;
+    }
+
+    // Check the tier parameter
+    const tier = req.query.tier;
+    if (!tier || !isTierValid(tier)) {
+        res.status(400);
+        res.json({ error: "tier is not valid", value: tier });
+        return;
+    }
+
+    // Find the card in the database
+    const card = getCard(id);
+    if (!card) {
+        res.status(404);
+        res.json({ error: "metadata not found for Miniflix Subscription Card #" + id });
+        return;
+    }
+
+    // Update the card
+    const oldTier = getAttribute(card, "Tier");
+    if (oldTier === tier) {
+        res.status(400);
+        res.json({ error : "card already has this tier value", value: tier});
+        return;
+    }
+    card.attributes = updateAttribute(card, "Tier", tier);
+    card.image = getImagePath(tier);
+    saveData();
+
+    console.log("POST: subscription card #%s updated (new tier: %s)", id, tier);
+    res.status(200);
+    res.json({ status: "Subscription card updated", id: id }); 
+});
+
+/**
+ * Extend the duration of a subscription card.
+ */
+ router.put("/extend/:id", (req, res) => {
+    // TODO
+});
+
+/**
+ * Subscribe again after a subscription card has expired.
+ */
+ router.put("/resubscribe/:id", (req, res) => {
+    // TODO
+});
+
+/**
  * Save the new cards data.
  */
 function saveData() {
     fs.writeFileSync("data/cards.json", JSON.stringify(cards, null, 2));
+}
+
+/**
+ * Get a card of the database.
+ * @param {*} id 
+ * @returns 
+ */
+ function getCard(id) {
+    return cards.find(x => x.id.toString() === id.toString());
 }
 
 /**
@@ -114,6 +182,27 @@ function isTierValid(tier) {
         default:
             return false;
     }
+}
+
+function getAttribute(card, type) {
+    for(i = 0; i < card.attributes.length; i++) {
+        const attr = card.attributes[i];
+        if (attr["trait_type"] === type) {
+            return attr.value;
+        }
+    }
+    return null;
+}
+
+function updateAttribute(card, type, newvalue) {
+    for(i = 0; i < card.attributes.length; i++) {
+        let attr = card.attributes[i];
+        if (attr["trait_type"] === type) {
+            attr.value = newvalue;
+        }
+        card.attributes[i] = attr;
+    }
+    return card.attributes;
 }
 
 /**
